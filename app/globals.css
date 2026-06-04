@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+html {
+  scroll-behavior: smooth;
+}
+
+html.light body {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+html.light .text-white {
+  color: #111827 !important;
+}
+
+html.light .text-gray-300,
+html.light .text-gray-400,
+html.light .text-gray-500 {
+  color: #4b5563 !important;
+}
+
+html.light .bg-white\/5 {
+  background: rgba(255, 255, 255, 0.85) !important;
+}
+
+html.light .bg-white\/10 {
+  background: rgba(0, 0, 0, 0.06) !important;
+}
+
+html.light .border-white\/5,
+html.light .border-white\/10 {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+html.light .bg-\[\#070B14\],
+html.light .bg-\[\#0B0F1A\],
+html.light .bg-\[\#111827\],
+html.light .bg-\[\#0B1220\] {
+  background: #ffffff !important;
+}
+
+html.light .from-\[\#0B0F1A\],
+html.light .via-\[\#111827\],
+html.light .to-black {
+  --tw-gradient-from: #f3f4f6 !important;
+  --tw-gradient-via: #ffffff !important;
+  --tw-gradient-to: #e5e7eb !important;
+}
