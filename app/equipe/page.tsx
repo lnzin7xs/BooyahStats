@@ -18,6 +18,7 @@ export default function EquipePage() {
   const [teamName, setTeamName] = useState("");
   const [teamLogo, setTeamLogo] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [userId, setUserId] = useState("");
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showVipPopup, setShowVipPopup] = useState(false);
@@ -25,19 +26,35 @@ export default function EquipePage() {
   const isVip = false;
 
   useEffect(() => {
-    fetchTeams();
+    loadUser();
   }, []);
 
-  async function fetchTeams() {
+  async function loadUser() {
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+
+    if (error || !user) {
+      alert("Você precisa estar logado para acessar suas equipes.");
+      return;
+    }
+
+    setUserId(user.id);
+    await fetchTeams(user.id);
+  }
+
+  async function fetchTeams(uid: string) {
     const { data, error } = await supabase
       .from("teams")
       .select("*")
+      .eq("user_id", uid)
       .order("created_at", {
         ascending: false,
       });
 
     if (error) {
-      alert("Erro ao buscar equipes.");
+      alert("Erro ao buscar equipes: " + error.message);
       return;
     }
 
@@ -45,6 +62,11 @@ export default function EquipePage() {
   }
 
   async function createTeam() {
+    if (!userId) {
+      alert("Você precisa estar logado para criar uma equipe.");
+      return;
+    }
+
     if (!teamName.trim()) {
       alert("Digite o nome da equipe.");
       return;
@@ -55,7 +77,7 @@ export default function EquipePage() {
     let logoUrl = "";
 
     if (teamLogo) {
-      const fileName = `${Date.now()}-${teamLogo.name}`;
+      const fileName = `${userId}/${Date.now()}-${teamLogo.name}`;
 
       const { error: uploadError } = await supabase.storage
         .from("team-logos")
@@ -78,6 +100,7 @@ export default function EquipePage() {
       {
         name: teamName.trim(),
         logo_url: logoUrl,
+        user_id: userId,
       },
     ]);
 
@@ -91,7 +114,7 @@ export default function EquipePage() {
     setTeamLogo(null);
     setShowCreateModal(false);
 
-    await fetchTeams();
+    await fetchTeams(userId);
 
     setLoading(false);
   }
@@ -100,18 +123,27 @@ export default function EquipePage() {
     e.preventDefault();
     e.stopPropagation();
 
+    if (!userId) {
+      alert("Você precisa estar logado para apagar uma equipe.");
+      return;
+    }
+
     const confirmDelete = confirm("Tem certeza que deseja apagar esta equipe?");
 
     if (!confirmDelete) return;
 
-    const { error } = await supabase.from("teams").delete().eq("id", id);
+    const { error } = await supabase
+      .from("teams")
+      .delete()
+      .eq("id", id)
+      .eq("user_id", userId);
 
     if (error) {
-      alert("Erro ao apagar equipe.");
+      alert("Erro ao apagar equipe: " + error.message);
       return;
     }
 
-    fetchTeams();
+    await fetchTeams(userId);
   }
 
   function handleOpenCreateTeam() {
